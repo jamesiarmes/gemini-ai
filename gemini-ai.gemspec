@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'event_stream_parser', '~> 1.0'
   spec.add_dependency 'faraday', '~> 2.9'
+  spec.add_dependency 'faraday-retry', '~> 2.2'
   spec.add_dependency 'faraday-typhoeus', '~> 1.1'
   spec.add_dependency 'googleauth', '~> 1.8'
   spec.add_dependency 'typhoeus', '~> 1.4', '>= 1.4.1'

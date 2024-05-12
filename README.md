@@ -933,6 +933,31 @@ client = Gemini.new(
 )
 ```
 
+#### Retry
+
+The gem uses [faraday-retry](https://github.com/lostisland/faraday-retry) to retry requests. In addition to the default
+options, [429 responses](https://github.com/lostisland/faraday-retry?tab=readme-ov-file#automatically-handle-the-retry-after-and-ratelimit-reset-headers)
+are automatically handled.
+
+You can configure any options supported by faraday-retry:
+
+```ruby
+client = Gemini.new(
+  credentials: { service: 'vertex-ai-api', region: 'us-east4' },
+  options: {
+    model: 'gemini-pro',
+    connection: {
+      retry: {
+        max: 2,
+        interval: 0.05,
+        interval_randomness: 0.5,
+        backoff_factor: 2
+      }
+    }
+  }
+)
+```
+
 #### Timeout
 
 You can set the maximum number of seconds to wait for the request to complete with the `timeout` option:

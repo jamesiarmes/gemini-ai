@@ -2,6 +2,7 @@
 
 require 'event_stream_parser'
 require 'faraday'
+require 'faraday/retry'
 require 'faraday/typhoeus'
 require 'json'
 require 'googleauth'
@@ -13,7 +14,13 @@ module Gemini
     class Client
       ALLOWED_REQUEST_OPTIONS = %i[timeout open_timeout read_timeout write_timeout].freeze
 
+      ALLOWED_RETRY_OPTIONS = %i[backoff_factor exceptions interval interval_randomness
+                                 max max_interval methods retry_block retry_if
+                                 retry_statuses].freeze
+
       DEFAULT_FARADAY_ADAPTER = :typhoeus
+
+      DEFAULT_RETRY_OPTIONS = { methods: %i[get post], retry_statuses: [429] }.freeze
 
       DEFAULT_SERVICE_VERSION = 'v1'
 
@@ -54,6 +61,9 @@ module Gemini
                    end
 
         @server_sent_events = config.dig(:options, :server_sent_events)
+
+        @retry_options = DEFAULT_RETRY_OPTIONS.merge(config.dig(:options, :connection, :retry) || {})
+        @retry_options.select! { |key, _| ALLOWED_RETRY_OPTIONS.include?(key) }
 
         @request_options = config.dig(:options, :connection, :request)
 
@@ -99,6 +109,7 @@ module Gemini
 
         response = Faraday.new(request: @request_options) do |faraday|
           faraday.adapter @faraday_adapter
+          faraday.request :retry, @retry_options
           faraday.response :raise_error
         end.post do |request|
           request.url url
